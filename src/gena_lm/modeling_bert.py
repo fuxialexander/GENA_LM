@@ -1355,6 +1355,8 @@ class BertForPreTraining(BertPreTrainedModel):
         prediction_scores, seq_relationship_score = self.cls(sequence_output, pooled_output)
 
         total_loss = None
+        masked_lm_loss = None
+        next_sentence_loss = None
         if labels is not None and next_sentence_label is not None:
             loss_fct = CrossEntropyLoss()
             masked_lm_loss = loss_fct(prediction_scores.view(-1, self.config.vocab_size), labels.view(-1))
@@ -1365,7 +1367,7 @@ class BertForPreTraining(BertPreTrainedModel):
             output = (prediction_scores, seq_relationship_score) + outputs[2:]
             return ((total_loss,) + output) if total_loss is not None else output
 
-        return BertForPreTrainingOutput(
+        return sequence_output, BertForPreTrainingOutput(
             loss=total_loss,
             mlm_loss=masked_lm_loss,
             nsp_loss=next_sentence_loss,
